@@ -1,0 +1,30 @@
+# Core dependencies - upgraded for compatibility
+pip>=23.0
+setuptools>=68.0
+wheel>=0.41.0
+
+# Web Framework
+fastapi==0.104.1
+uvicorn==0.24.0
+python-multipart==0.0.6
+
+# Data Validation
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# Database
+sqlalchemy==2.0.23
+
+# Image Processing
+pillow==10.1.0
+numpy==1.24.3
+
+# Configuration
+python-dotenv==1.0.0
+
+# ML Framework (install without build from binary wheels)
+torch==2.1.1 --only-binary :all:
+torchvision==0.16.1 --only-binary :all:
+
+# Computer Vision (use pre-built wheels)
+opencv-python==4.8.1.78

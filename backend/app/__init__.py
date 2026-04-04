@@ -1,0 +1,1 @@
+"""FastAPI Object Detection Application."""
