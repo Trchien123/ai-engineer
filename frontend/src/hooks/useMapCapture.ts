@@ -10,13 +10,16 @@ export interface MapFrame {
   height: number
 }
 
-export const useMapCapture = () => {
-  const mapContainerRef = useRef<HTMLDivElement>(null)
+export const useMapCapture = (containerRef?: React.RefObject<HTMLDivElement> | React.MutableRefObject<HTMLDivElement | null>) => {
+  const internalRef = useRef<HTMLDivElement>(null)
   const [isCapturing, setIsCapturing] = useState(false)
   const [currentCaptureDataUrl, setCurrentCaptureDataUrl] = useState<string | null>(null)
 
+  const mapContainerRef = containerRef || internalRef
+
   const captureMapView = useCallback(async (): Promise<MapFrame | null> => {
-    if (!mapContainerRef.current) {
+    const targetRef = containerRef || internalRef
+    if (!targetRef.current) {
       console.error('Map container ref not available')
       return null
     }
@@ -25,7 +28,7 @@ export const useMapCapture = () => {
       setIsCapturing(true)
 
       // Use html2canvas to capture the map view
-      const canvas = await html2canvas(mapContainerRef.current, {
+      const canvas = await html2canvas(targetRef.current, {
         allowTaint: true,
         useCORS: true,
         backgroundColor: '#ffffff',
@@ -45,7 +48,7 @@ export const useMapCapture = () => {
     } finally {
       setIsCapturing(false)
     }
-  }, [])
+  }, [containerRef])
 
   return {
     mapContainerRef,

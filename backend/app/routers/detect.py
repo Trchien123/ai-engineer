@@ -1,11 +1,13 @@
 """
 API router for detection endpoints.
 """
-from fastapi import APIRouter, UploadFile, File, Form, Depends, HTTPException
+from fastapi import APIRouter, UploadFile, File, Form, Body, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import Optional
+from pathlib import Path
 import io
 
+from app.config import settings
 from app.models.database import get_db, DetectionResult
 from app.models.schemas import DetectionResultResponse, DetectionRequestBase
 from app.services.model_loader import model_loader
@@ -25,15 +27,15 @@ inference_engine = InferenceEngine(model_loader)
 @router.post("/detect", response_model=DetectionResultResponse)
 async def detect(
     model_type: str = Form(..., description="Model type: rubbish_area, rubbish_classification, or traffic_sign"),
-    file: UploadFile = File(..., description="Image file (jpg, png, bmp)"),
+    file: UploadFile = File(..., description="Image or video file (jpg, png, bmp, mp4, avi, mov, webm)"),
     db: Session = Depends(get_db)
 ):
     """
-    Run object detection on an uploaded image.
+    Run object detection on an uploaded image or video file.
     
     Args:
         model_type: Which detection model to use
-        file: Image file to process
+        file: Image or video file to process
         db: Database session
     
     Returns:
@@ -45,13 +47,25 @@ async def detect(
         
         logger.info(f"Received detection request: model={model_type}, file_size={len(contents)} bytes")
         
-        # Load image
-        image_array = ImageStorageService.load_image_from_bytes(contents)
+        # Load image from upload or extract a frame from video
+        if file.content_type.startswith('video/') or Path(file.filename).suffix.lower() in ['.mp4', '.avi', '.mov', '.webm', '.mkv']:
+            image_array = ImageStorageService.load_frame_from_video_bytes(contents, Path(file.filename).suffix or '.mp4')
+        else:
+            image_array = ImageStorageService.load_image_from_bytes(contents)
         image_height, image_width = image_array.shape[:2]
         
-        # Check if model is loaded
+        # Ensure the requested model is available
         if not model_loader.is_loaded(model_type):
-            raise ModelNotLoadedError(model_type)
+            loaded = model_loader.load_model(model_type)
+            if not loaded:
+                config = model_loader.model_configs.get(model_type)
+                if config is None:
+                    raise HTTPException(status_code=400, detail=f"Unknown model type: {model_type}")
+                model_path = Path(config.get("dir", settings.MODELS_DIR)) / config["file"]
+                raise ModelNotLoadedError(
+                    model_type,
+                    reason=f"Model '{model_type}' is not available. Place the file at: {model_path}"
+                )
         
         # Run inference
         result = inference_engine.infer(image_array, model_type)
@@ -107,8 +121,8 @@ async def detect(
 
 @router.post("/detect-base64", response_model=DetectionResultResponse)
 async def detect_base64(
-    model_type: str,
-    image_base64: str,
+    model_type: str = Body(..., description="Model type: rubbish_area, rubbish_classification, or traffic_sign"),
+    image_base64: str = Body(..., description="Base64-encoded image string"),
     db: Session = Depends(get_db)
 ):
     """
@@ -130,9 +144,18 @@ async def detect_base64(
         image_array = ImageStorageService.load_image_from_base64(image_base64)
         image_height, image_width = image_array.shape[:2]
         
-        # Check if model is loaded
+        # Ensure the requested model is available
         if not model_loader.is_loaded(model_type):
-            raise ModelNotLoadedError(model_type)
+            loaded = model_loader.load_model(model_type)
+            if not loaded:
+                config = model_loader.model_configs.get(model_type)
+                if config is None:
+                    raise HTTPException(status_code=400, detail=f"Unknown model type: {model_type}")
+                model_path = Path(config.get("dir", settings.MODELS_DIR)) / config["file"]
+                raise ModelNotLoadedError(
+                    model_type,
+                    reason=f"Model '{model_type}' is not available. Place the file at: {model_path}"
+                )
         
         # Run inference
         result = inference_engine.infer(image_array, model_type)

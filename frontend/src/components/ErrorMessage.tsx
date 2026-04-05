@@ -11,13 +11,15 @@ interface Props {
 
 export const ErrorMessage: React.FC<Props> = ({ error, onDismiss }) => {
   return (
-    <div className="error-message">
-      <div className="error-content">
-        <span className="error-icon">⚠️</span>
-        <span className="error-text">{error}</span>
-      </div>
+    <div className="error-message" role="alert">
+      <span className="error-icon" aria-hidden="true">⚠</span>
+      <span className="error-text">{error}</span>
       {onDismiss && (
-        <button className="error-close" onClick={onDismiss}>
+        <button
+          className="error-close"
+          onClick={onDismiss}
+          aria-label="Dismiss error"
+        >
           ✕
         </button>
       )}

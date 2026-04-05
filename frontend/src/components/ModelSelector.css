@@ -1,51 +1,72 @@
-/**
- * Model Selector Styles
- */
+/* ============================================================
+   MODEL SELECTOR
+   ============================================================ */
 .model-selector {
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: 10px;
-  padding: 15px;
-  background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  flex-wrap: wrap;
 }
 
 .model-selector label {
-  font-weight: 600;
-  font-size: 14px;
-  color: #333;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .model-select {
-  padding: 10px;
-  border: 2px solid #e0e0e0;
-  border-radius: 4px;
-  font-size: 14px;
-  transition: border-color 0.2s;
-}
-
-.model-select:hover {
-  border-color: #007bff;
-}
-
-.model-select:focus {
-  outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.25);
-}
-
-.model-select:disabled {
-  background-color: #f5f5f5;
-  cursor: not-allowed;
-  color: #999;
+  flex: 1;
+  min-width: 200px;
+  max-width: 360px;
 }
 
 .model-info {
+  width: 100%;
   font-size: 12px;
-  color: #666;
-  font-style: italic;
-  padding: 8px;
-  background-color: #f9f9f9;
-  border-radius: 4px;
+  color: var(--text-tertiary);
+  padding: 2px 0 0;
+  line-height: 1.4;
+}
+
+/* ── Compact (header) variant ── */
+.model-selector--compact {
+  flex-wrap: nowrap;
+}
+
+.model-selector--compact .model-select {
+  min-width: 0;
+  width: auto;
+  max-width: 200px;
+  height: 30px;
+  font-size: 12px;
+  padding: 0 28px 0 10px;
+  background-color: var(--bg-elevated);
+  border-color: var(--border);
+  border-radius: var(--r-md);
+  color: var(--text-secondary);
+}
+
+.model-selector--compact .model-select:hover {
+  border-color: var(--border-light);
+  color: var(--text-primary);
+}
+
+@media (max-width: 600px) {
+  .model-selector {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .model-select {
+    width: 100%;
+    max-width: 100%;
+  }
+
+  .model-selector--compact .model-select {
+    max-width: 140px;
+    font-size: 11px;
+  }
 }

@@ -242,41 +242,46 @@ class InferenceEngine:
                 'original_size': (0, 0),
                 'error': f"Model '{model_name}' not loaded"
             }
-        
+
         try:
-            # Preprocess
-            processed_image, original_size = self.pipeline.preprocess_image(image_array)
-            logger.info(f"Image preprocessed: {original_size} -> {settings.IMAGE_RESIZE_SIZE}")
-            
-            # Convert to tensor format expected by model
-            import torch
-            image_tensor = torch.from_numpy(processed_image).float()
-            
-            # Inference
-            with torch.no_grad():
-                model_output = model(image_tensor)
-            
-            logger.info(f"Model inference complete")
-            
-            # Post-process
-            detections = self.pipeline.extract_detections(
-                model_output if isinstance(model_output, dict) else {'detections': []},
-                original_size,
-                model_name
-            )
-            
-            # Apply NMS
-            detections = self.pipeline.apply_nms(detections)
-            
+            if model_name in ('traffic_sign', 'rubbish'):
+                # These models are custom two-stage detector bundles with their own .infer() method.
+                detections = model.infer(image_array)
+                original_size = (image_array.shape[1], image_array.shape[0])
+            else:
+                # Preprocess
+                processed_image, original_size = self.pipeline.preprocess_image(image_array)
+                logger.info(f"Image preprocessed: {original_size} -> {settings.IMAGE_RESIZE_SIZE}")
+
+                # Convert to tensor format expected by model
+                import torch
+                image_tensor = torch.from_numpy(processed_image).float()
+
+                # Inference
+                with torch.no_grad():
+                    model_output = model(image_tensor)
+
+                logger.info(f"Model inference complete")
+
+                # Post-process
+                detections = self.pipeline.extract_detections(
+                    model_output if isinstance(model_output, dict) else {'detections': []},
+                    original_size,
+                    model_name
+                )
+
+                # Apply NMS
+                detections = self.pipeline.apply_nms(detections)
+
             inference_time_ms = (time.time() - start_time) * 1000
-            
+
             return {
                 'detections': detections,
                 'inference_time_ms': inference_time_ms,
                 'original_size': original_size,
                 'error': None
             }
-        
+
         except Exception as e:
             inference_time_ms = (time.time() - start_time) * 1000
             logger.error(f"Inference failed: {str(e)}")

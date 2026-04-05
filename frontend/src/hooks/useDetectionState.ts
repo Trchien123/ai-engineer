@@ -43,7 +43,7 @@ export interface DetectionState {
 
 const initialState = {
   availableModels: null,
-  selectedModel: 'rubbish_area' as ModelType,
+  selectedModel: 'rubbish' as ModelType,
   modelsLoading: false,
   modelsError: null,
 

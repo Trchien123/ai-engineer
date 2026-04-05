@@ -1,220 +1,152 @@
-# Object Detection System
+# AI Engineer — Object Detection System
 
-A full-stack web application for real-time object detection and classification. Features video analysis and Google Maps integration for detecting:
+A full-stack web application for real-time object detection using YOLO-based models. Supports video frame analysis and Google Maps Street View capture with two detection pipelines:
 
-- **Rubbish Areas**: Identify regions with rubbish accumulation
-- **Rubbish Classification**: Classify rubbish into ~10 types (plastic, paper, metal, glass, etc.)
-- **Damaged Traffic Signs**: Detect and flag damaged or defaced traffic signs
+- **Rubbish Detection** — identifies rubbish accumulation areas and classifies waste types (plastic, paper, metal, glass, cardboard, organic, etc.)
+- **Damaged Sign Detection** — detects and identifies damaged or missing traffic signs
+
+---
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|-----------|
+| Frontend | React 18, TypeScript, Vite, Zustand |
+| Backend | FastAPI, Python 3.10+ |
+| ML | PyTorch, YOLOv8, EfficientNetV2, FAISS |
+| Database | SQLite |
+
+---
 
 ## Quick Start
 
-### Prerequisites
-- Python 3.8+
-- Node.js 16+
-- npm or yarn
-- YOLO model files (.pt format)
+### 1. Backend
 
-### Setup
-
-1. **Clone the repository**
-```bash
-git clone <repo-url>
-cd ai-engineer
-```
-
-2. **Backend Setup** (see [backend/README.md](backend/README.md))
 ```bash
 cd backend
+
+# Create and activate virtual environment
 python -m venv venv
-source venv/bin/activate  # On Windows: venv\Scripts\activate
+venv\Scripts\activate        # Windows
+# source venv/bin/activate   # macOS/Linux
+
 pip install -r requirements.txt
-python -m app.main
+
+python -m uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 ```
 
-3. **Frontend Setup** (see [frontend/README.md](frontend/README.md))
+> Place model files in `backend/app/models_data/` before starting.  
+> See the **Models** section below for the expected directory structure.
+
+### 2. Frontend
+
 ```bash
 cd frontend
 npm install
 npm run dev
 ```
 
-4. **Access the app**: Open http://localhost:3000 in your browser
+Open `http://localhost:3000`.
+
+> The Vite dev server proxies `/api` → `http://localhost:8000` automatically.
+
+---
+
+## Models
+
+Model files are **not included** in this repository (large binaries). Place them at:
+
+```
+backend/app/models_data/
+├── yolov26_1_class.pt                  ← Traffic sign YOLO detector
+├── damaged_sign_detection/
+│   ├── EffnetV2_multilabel.pth         ← Sign classifier
+│   ├── traffic_signs_3.index           ← FAISS retrieval index
+│   └── traffic_signs_metadata_3.json
+└── rubbish_detection/
+    ├── stage1_best.pt                  ← Rubbish area detector
+    └── stage2_best.pt                  ← Rubbish type classifier
+```
+
+---
 
 ## Features
 
-### Video Analysis
-- Upload video files (MP4, AVI, MOV, WebM)
-- Play/pause/stop video playback
-- Capture individual frames during playback
-- Run detection on captured frames
-- View results with bounding boxes and labels
+**Video Analysis**
+- Upload MP4, AVI, MOV, or WebM files
+- Play video and capture individual frames
+- Run detection on any captured frame
+- Annotated results with bounding boxes, labels, and confidence scores
+- Click a detected object thumbnail to highlight it on the full image
 
-### Map Analysis
-- View street maps (Google Maps integration)
-- Capture current map view
-- Run detection on map views
-- Identify objects in street scenes
+**Map Analysis**
+- Google Maps integration (Roadmap + Street View)
+- Capture the current map view and run detection on it
+- Works with both satellite/roadmap and Street View panoramas
 
-### Detection Models
-- Model selection dropdown
-- Real-time inference
-- Confidence score display
-- Bounding box overlay rendering
-- Detection history tracking
+**Detection UI**
+- Model selector (choose between rubbish or damaged sign pipeline)
+- Annotated canvas with per-class color-coded bounding boxes
+- Grouped detection summary panel with crop thumbnails
+- Inference time display
+
+---
 
 ## Project Structure
 
 ```
 ai-engineer/
-├── backend/                          # FastAPI application
+├── backend/
 │   ├── app/
-│   │   ├── main.py                  # FastAPI entry point
-│   │   ├── config.py                # Configuration
-│   │   ├── models/                  # Database & schemas
-│   │   ├── services/                # Business logic
-│   │   ├── routers/                 # API endpoints
-│   │   ├── utils/                   # Utilities
-│   │   └── models_data/             # Model storage
-│   ├── requirements.txt             # Python dependencies
-│   └── README.md                    # Backend documentation
+│   │   ├── main.py              # FastAPI entry point
+│   │   ├── config.py            # Settings (model paths, thresholds)
+│   │   ├── models/              # SQLAlchemy models & schemas
+│   │   ├── routers/             # API route handlers
+│   │   ├── services/            # Inference pipelines, storage
+│   │   ├── utils/               # Exceptions, helpers
+│   │   └── models_data/         # Model files (gitignored)
+│   └── requirements.txt
 │
-├── frontend/                         # React TypeScript app
-│   ├── src/
-│   │   ├── components/              # Reusable components
-│   │   ├── pages/                   # Feature pages
-│   │   ├── hooks/                   # Custom React hooks
-│   │   ├── services/                # API client
-│   │   ├── types/                   # TypeScript types
-│   │   └── App.tsx                  # Main app
-│   ├── package.json                 # Node dependencies
-│   ├── vite.config.ts              # Vite config
-│   └── README.md                    # Frontend documentation
-│
-├── shared/                          # Shared types (if needed)
-├── .env                             # Environment variables
-├── README.md                        # This file
-├── SETUP.md                         # Detailed setup guide
-└── ARCHITECTURE.md                  # Architecture documentation
+└── frontend/
+    ├── src/
+    │   ├── components/          # Shared UI components
+    │   ├── pages/               # VideoUploader, VideoPlayer, MapViewer
+    │   ├── hooks/               # useDetectionState, useMapCapture
+    │   ├── services/            # Axios API client
+    │   └── types/               # TypeScript types
+    ├── vite.config.ts
+    └── package.json
 ```
-
-## Architecture Overview
-
-### High-Level Flow
-```
-React Frontend (TypeScript + Vite)
-        ↓ (HTTP/JSON)
-FastAPI Backend (Python 3.8+)
-        ↓ (Model inference)
-PyTorch YOLO Models
-        ↓ (Results)
-SQLite Database
-```
-
-## Documentation
-
-- **[SETUP.md](SETUP.md)** - Complete setup and configuration guide
-- **[ARCHITECTURE.md](ARCHITECTURE.md)** - Detailed architecture and design
-- **[backend/README.md](backend/README.md)** - Backend API documentation
-- **[frontend/README.md](frontend/README.md)** - Frontend documentation
-
-## Development
-
-### Backend Development
-```bash
-cd backend
-source venv/bin/activate
-python -m uvicorn app.main:app --reload
-```
-
-### Frontend Development
-```bash
-cd frontend
-npm run dev
-```
-
-### Code Quality
-
-```bash
-# Backend type checking (once installed)
-# cd backend && mypy app/
-
-# Frontend type checking & linting
-cd frontend
-npm run lint
-npm run type-check
-```
-
-## API Endpoints
-
-### Detection
-- **POST** `/api/detect` - Upload image and detect objects
-- **POST** `/api/detect-base64` - Detect from base64-encoded image
-
-### Models
-- **GET** `/api/models` - List available models
-
-### Results
-- **GET** `/api/results` - Detection history
-- **GET** `/api/results/{id}` - Specific result
-
-### Health
-- **GET** `/health` - API health status
-- **GET** `/` - API information
-
-Interactive docs: http://localhost:8000/docs (Swagger UI)
-
-## Performance
-
-- **Inference Time**: 50-200ms per image (depends on model)
-- **Model Loading**: ~2-5 seconds on startup for all 3 models
-- **Video Processing**: Real-time frame capture and detection
-- **Database**: SQLite for local dev (PostgreSQL for production)
-
-## Troubleshooting
-
-### Backend Issues
-- **Models not found**: Place .pt files in `backend/app/models_data/`
-- **Import errors**: Run `pip install -r requirements.txt`
-- **Database locked**: Delete `detection_results.db` and restart
-
-### Frontend Issues
-- **API connection error**: Check backend runs on http://localhost:8000
-- **Video upload fails**: Ensure file size < 500MB and format is supported
-- **Models not loading**: Check `/api/models` endpoint in browser Network tab
-
-## Technology Stack
-
-**Backend:**
-- FastAPI 0.104+
-- SQLAlchemy 2.0+
-- PyTorch 2.1+
-- OpenCV 4.8+
-- Python 3.8+
-
-**Frontend:**
-- React 18.2+
-- TypeScript 5.2+
-- Vite 5.0+
-- Zustand 4.4+
-- Axios 1.6+
-
-## Contributing
-
-1. Create a feature branch
-2. Follow the project's code style
-3. Write clear commit messages
-4. Submit a pull request
-
-## License
-
-See [LICENSE](LICENSE) file.
-
-## Support
-
-For issues, questions, or suggestions, please open a GitHub issue.
 
 ---
 
-**Version**: 1.0.0  
-**Status**: Active Development  
-**Last Updated**: April 2026
+## API Reference
+
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `POST` | `/api/detect` | Detect from uploaded image file |
+| `POST` | `/api/detect-base64` | Detect from base64-encoded image |
+| `GET` | `/api/models` | List loaded models |
+| `GET` | `/api/results` | Detection history |
+| `GET` | `/health` | Health check |
+
+Interactive docs at `http://localhost:8000/docs`.
+
+---
+
+## Environment Variables
+
+**Frontend** (`frontend/.env.local`):
+
+```env
+# Required only for the Map tab
+VITE_GOOGLE_MAPS_API_KEY=your_key_here
+```
+
+Google Maps requires the **Maps JavaScript API**, **Static Maps API**, and **Street View Static API** enabled in your Google Cloud project.
+
+---
+
+## License
+
+See [LICENSE](LICENSE).

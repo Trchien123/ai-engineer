@@ -39,7 +39,7 @@ export interface DetectionHistoryResponse {
   limit: number
 }
 
-export type ModelType = 'rubbish_area' | 'rubbish_classification' | 'traffic_sign'
+export type ModelType = 'rubbish' | 'traffic_sign'
 
 export interface HealthCheckResponse {
   status: string

@@ -87,6 +87,12 @@ async def health_check():
     }
 
 
+@app.get("/api/health", tags=["health"])
+async def api_health_check():
+    """Alias health endpoint for /api/health."""
+    return await health_check()
+
+
 @app.get("/", tags=["info"])
 async def root():
     """Root endpoint with API information."""
@@ -95,6 +101,7 @@ async def root():
         "version": settings.API_VERSION,
         "endpoints": {
             "health": "/health",
+            "health_api": "/api/health",
             "docs": "/docs",
             "openapi": "/openapi.json",
             "models_list": "/api/models",

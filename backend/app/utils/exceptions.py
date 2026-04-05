@@ -6,10 +6,11 @@ from fastapi import HTTPException, status
 
 class ModelNotLoadedError(HTTPException):
     """Raised when a model fails to load or is not found."""
-    def __init__(self, model_name: str):
+    def __init__(self, model_name: str, reason: str | None = None):
+        detail = reason or f"Model '{model_name}' is not loaded or unavailable."
         super().__init__(
             status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
-            detail=f"Model '{model_name}' is not loaded or unavailable."
+            detail=detail
         )
 
 

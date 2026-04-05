@@ -11,8 +11,13 @@ interface Props {
 
 export const LoadingSpinner: React.FC<Props> = ({ message, size = 'medium' }) => {
   return (
-    <div className={`loading-container loading-${size}`}>
-      <div className="spinner"></div>
+    <div
+      className={`loading-container loading-${size}`}
+      role="status"
+      aria-live="polite"
+      aria-label={message ?? 'Loading'}
+    >
+      <div className="spinner" aria-hidden="true" />
       {message && <p className="loading-message">{message}</p>}
     </div>
   )
