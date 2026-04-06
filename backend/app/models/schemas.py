@@ -69,7 +69,29 @@ class HealthCheckResponse(BaseModel):
 
 class DetectionHistoryResponse(BaseModel):
     """Response for detection history."""
-    
+
     results: List[DetectionResultResponse]
     total: int = Field(..., description="Total number of results")
     limit: int = Field(..., description="Results returned (pagination limit)")
+
+
+class ExplainResult(BaseModel):
+    """Single XAI result for one predicted damage class."""
+
+    class_name: str = Field(..., description="Predicted damage class (e.g. 'rust')")
+    probability: float = Field(..., ge=0.0, le=1.0, description="Sigmoid probability [0, 1]")
+    image_base64: str = Field(
+        ...,
+        description=(
+            "Base64-encoded PNG visualisation. "
+            "Use as: <img src='data:image/png;base64,{image_base64}'>"
+        ),
+    )
+
+
+class ExplainResponse(BaseModel):
+    """Response from POST /api/explain."""
+
+    method: str = Field(..., description="XAI method used: grad_cam | shap | zennit")
+    results: List[ExplainResult] = Field(..., description="One entry per active damage class")
+    inference_time_ms: float = Field(..., description="Time taken for the XAI pass (ms)")

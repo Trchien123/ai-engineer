@@ -52,3 +52,20 @@ export interface CapturedImage {
   width: number
   height: number
 }
+
+// ── Explainable AI ────────────────────────────────────────────
+
+export type XaiMethod = 'grad_cam' | 'shap' | 'zennit'
+
+export interface ExplainResult {
+  class_name: string
+  probability: number
+  /** Base64-encoded PNG. Render as: <img src={`data:image/png;base64,${image_base64}`} /> */
+  image_base64: string
+}
+
+export interface ExplainResponse {
+  method: XaiMethod
+  results: ExplainResult[]
+  inference_time_ms: number
+}

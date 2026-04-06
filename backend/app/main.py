@@ -11,7 +11,7 @@ from app.models.database import init_db
 from app.services.model_loader import model_loader
 from app.utils.logger import get_logger
 
-from app.routers import detect, models, results
+from app.routers import detect, models, results, explain
 
 logger = get_logger(__name__)
 
@@ -73,6 +73,7 @@ app.add_middleware(
 app.include_router(detect.router)
 app.include_router(models.router)
 app.include_router(results.router)
+app.include_router(explain.router)
 
 
 # Health check endpoint
@@ -108,7 +109,8 @@ async def root():
             "detection": "/api/detect",
             "detection_base64": "/api/detect-base64",
             "results_history": "/api/results",
-            "result_by_id": "/api/results/{result_id}"
+            "result_by_id": "/api/results/{result_id}",
+            "explain": "/api/explain",
         }
     }
 

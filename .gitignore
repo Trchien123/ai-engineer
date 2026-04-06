@@ -20,6 +20,7 @@ backend/app/models_data/
 # Root-level model/experiment directories
 damaged_sign_detection/
 rubbish_detection/
+updated_damaged_sign_detection/
 
 # ============================================================
 # PYTHON

@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useRef, useState, useCallback } from 'react'
 import { DetectionBox } from '../types/detection'
+import { ExplainPanel } from './ExplainPanel'
 import './DetectionResults.css'
 
 interface Props {
@@ -14,6 +15,8 @@ interface Props {
   imageWidth: number
   imageHeight: number
   inferenceTime: number
+  /** When 'traffic_sign', shows the Explain button on detection items. */
+  modelType?: string
 }
 
 const CLASS_COLORS: Record<string, string> = {
@@ -107,9 +110,13 @@ export const DetectionResults: React.FC<Props> = ({
   imageWidth,
   imageHeight,
   inferenceTime,
+  modelType,
 }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [focused, setFocused] = useState<FocusedDet | null>(null)
+  const [explainTarget, setExplainTarget] = useState<DetectionBox | null>(null)
+
+  const isSignModel = modelType === 'traffic_sign'
 
   // ── Draw helpers ────────────────────────────────────────────
 
@@ -265,6 +272,17 @@ export const DetectionResults: React.FC<Props> = ({
 
   return (
     <section className="detection-results" aria-label="Detection results">
+      {/* ── XAI modal ── */}
+      {explainTarget && (
+        <ExplainPanel
+          imageDataUrl={imageDataUrl}
+          detection={explainTarget}
+          imageWidth={imageWidth}
+          imageHeight={imageHeight}
+          onClose={() => setExplainTarget(null)}
+        />
+      )}
+
       {/* ── Header ── */}
       <div className="results-header">
         <h3>Results</h3>
@@ -394,6 +412,15 @@ export const DetectionResults: React.FC<Props> = ({
                                 {Math.round(det.x_min)},{Math.round(det.y_min)} →{' '}
                                 {Math.round(det.x_max)},{Math.round(det.y_max)}
                               </span>
+                              {isSignModel && (
+                                <button
+                                  className="btn-explain"
+                                  title="Explain this detection with XAI"
+                                  onClick={(e) => { e.stopPropagation(); setExplainTarget(det) }}
+                                >
+                                  Explain
+                                </button>
+                              )}
                             </div>
                           </li>
                         )

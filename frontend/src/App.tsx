@@ -161,6 +161,7 @@ function App() {
               imageWidth={detectionResult.image_width}
               imageHeight={detectionResult.image_height}
               inferenceTime={detectionResult.inference_time_ms}
+              modelType={detectionResult.model_type}
             />
           </section>
         )}

@@ -24,6 +24,12 @@ CLASS_NAMES = [
     "scratch",
 ]
 
+# Per-class confidence thresholds tuned during training evaluation.
+# Order matches CLASS_NAMES: bent, broken_sheet, crack, graffiti, normal, paint_loss, rust, scratch
+CLASSIFIER_THRESHOLDS = [0.65, 0.7, 0.75, 0.75, 0.8, 0.9, 0.75, 0.85]
+
+NORMAL_CLASS_IDX = CLASS_NAMES.index("normal")
+
 RETRIEVER_THRESHOLD = 0.82
 YOLO_CONFIDENCE_THRESHOLD = 0.5
 YOLO_PREDICT_CONF = 0.2
@@ -127,10 +133,17 @@ def load_effnetv2_multilabel(model_path: Path, device=None):
     return model
 
 
-def predict_crop(crop_pil: Image.Image, model, device, threshold=0.5):
-    """Predict damage labels for a crop using the classifier."""
+def predict_crop(crop_pil: Image.Image, model, device, thresholds=None):
+    """Predict damage labels for a crop using the classifier.
+
+    Applies per-class thresholds and enforces normal exclusivity:
+    if the 'normal' class is predicted, all other damage labels are suppressed.
+    """
     from torchvision import transforms
     import torch
+
+    if thresholds is None:
+        thresholds = CLASSIFIER_THRESHOLDS
 
     transform = transforms.Compose([
         transforms.Resize((224, 224)),
@@ -143,7 +156,15 @@ def predict_crop(crop_pil: Image.Image, model, device, threshold=0.5):
         outputs = model(tensor)
         probs = torch.sigmoid(outputs).squeeze(0)
 
-    preds = (probs > threshold).int()
+    thresholds_tensor = torch.tensor(thresholds, dtype=torch.float32).to(probs.device)
+    preds = (probs > thresholds_tensor).int()
+
+    # Normal exclusivity: if 'normal' fires, suppress all other damage classes.
+    if preds[NORMAL_CLASS_IDX] == 1:
+        new_preds = torch.zeros_like(preds)
+        new_preds[NORMAL_CLASS_IDX] = 1
+        preds = new_preds
+
     predicted_labels = [
         (CLASS_NAMES[i], float(probs[i].item()))
         for i in range(len(CLASS_NAMES))
@@ -211,9 +232,13 @@ class DamagedSignDetector:
                 continue
 
             crop_pil = Image.fromarray(crop_bgr[:, :, ::-1])
-            damage_preds, _ = predict_crop(crop_pil, self.classifier, self.device)
+            damage_preds, _ = predict_crop(
+                crop_pil, self.classifier, self.device, thresholds=CLASSIFIER_THRESHOLDS
+            )
 
             if len(damage_preds) == 0:
+                damage_label = "normal"
+            elif len(damage_preds) == 1 and damage_preds[0][0] == "normal":
                 damage_label = "normal"
             else:
                 damage_label = ", ".join([name for name, _ in damage_preds])

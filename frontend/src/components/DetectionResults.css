@@ -322,6 +322,29 @@
   word-break: break-all;
 }
 
+.btn-explain {
+  display: inline-flex;
+  align-items: center;
+  height: 22px;
+  padding: 0 9px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  color: var(--accent);
+  background: var(--accent-surface);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--r-full);
+  align-self: flex-start;
+  transition: background var(--t-fast), border-color var(--t-fast), color var(--t-fast);
+  white-space: nowrap;
+}
+
+.btn-explain:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+
 /* ============================================================
    LIGHTBOX
    ============================================================ */

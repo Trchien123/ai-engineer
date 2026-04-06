@@ -8,6 +8,8 @@ import {
   DetectionHistoryResponse,
   HealthCheckResponse,
   ModelType,
+  ExplainResponse,
+  XaiMethod,
 } from '../types/detection'
 
 const API_BASE_URL = '/api'
@@ -142,6 +144,30 @@ export const HealthService = {
       console.error('Health check error:', error)
       throw error
     }
+  },
+}
+
+/**
+ * Service for Explainable AI (XAI) visualisations
+ */
+export const ExplainService = {
+  /**
+   * Send a cropped sign image blob and get XAI heatmap visualisations back.
+   *
+   * @param blob   PNG/JPEG blob of the sign crop
+   * @param method 'grad_cam' | 'shap' | 'zennit'
+   */
+  explainFromBlob: async (blob: Blob, method: XaiMethod): Promise<ExplainResponse> => {
+    const formData = new FormData()
+    formData.append('method', method)
+    formData.append('file', blob, 'crop.png')
+
+    const response = await apiClient.post<ExplainResponse>('/explain', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+      // SHAP can take up to ~30s — use a longer timeout for that method
+      timeout: method === 'shap' ? 120_000 : 30_000,
+    })
+    return response.data
   },
 }
 

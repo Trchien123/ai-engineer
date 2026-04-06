@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(pip install:*)",
+      "Bash(python -c \"import shap; import matplotlib; import numpy; print\\('shap:', shap.__version__\\); print\\('matplotlib:', matplotlib.__version__\\); print\\('numpy:', numpy.__version__\\)\")",
+      "Bash(e:/ai-engineer/backend/venv/Scripts/pip install:*)",
+      "Bash(e:/ai-engineer/backend/venv/Scripts/python -c \"import shap, zennit; print\\('shap:', shap.__version__\\); print\\('zennit:', zennit.__version__\\)\")",
+      "Bash(e:/ai-engineer/backend/venv/Scripts/python -c \"import shap, zennit, matplotlib; print\\('shap:', shap.__version__\\); print\\('zennit:', zennit.__version__\\); print\\('matplotlib:', matplotlib.__version__\\)\")",
+      "Bash(e:/ai-engineer/backend/venv/Scripts/python -c \"import shap, zennit, matplotlib; print\\('shap:', shap.__version__\\); print\\('matplotlib:', matplotlib.__version__\\); print\\('All XAI deps OK'\\)\")",
+      "Bash(python -c \"import shap; import zennit; print\\('shap:', shap.__version__\\); print\\('zennit:', zennit.__version__\\)\")",
+      "Bash(python -c \"import sys; print\\(sys.executable\\)\")",
+      "Bash(python -m pip install \"shap>=0.45.0\" \"zennit>=0.5.0\")"
+    ]
+  }
+}
