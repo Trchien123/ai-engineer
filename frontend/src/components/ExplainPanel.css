@@ -367,6 +367,73 @@
   object-fit: contain;
 }
 
+/* ── Sign Info tab button variant ── */
+.xai-method-tab--info {
+  margin-top: 6px;
+  border-style: dashed;
+}
+
+.xai-method-tab--info.active {
+  background: color-mix(in srgb, #10B981 12%, transparent);
+  border-color: #10B981;
+  border-style: solid;
+  color: #10B981;
+}
+
+/* ── Sign Info panel ── */
+.xai-info-panel {
+  width: 100%;
+}
+
+.xai-info-table {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+}
+
+.xai-info-row {
+  display: grid;
+  grid-template-columns: 180px 1fr;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: var(--r-md);
+  transition: background var(--t-fast);
+}
+
+.xai-info-row:hover {
+  background: var(--bg-elevated);
+}
+
+.xai-info-key {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-tertiary);
+  line-height: 1.5;
+  padding-top: 1px;
+}
+
+.xai-info-val {
+  font-size: 13px;
+  color: var(--text-primary);
+  line-height: 1.55;
+  margin: 0;
+  word-break: break-word;
+}
+
+.xai-info-link {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.xai-info-link:hover {
+  text-decoration: underline;
+}
+
 /* ── Responsive ── */
 @media (max-width: 700px) {
   .xai-body {

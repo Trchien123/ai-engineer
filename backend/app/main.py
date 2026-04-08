@@ -11,7 +11,7 @@ from app.models.database import init_db
 from app.services.model_loader import model_loader
 from app.utils.logger import get_logger
 
-from app.routers import detect, models, results, explain
+from app.routers import detect, models, results, explain, sign_info
 
 logger = get_logger(__name__)
 
@@ -74,6 +74,7 @@ app.include_router(detect.router)
 app.include_router(models.router)
 app.include_router(results.router)
 app.include_router(explain.router)
+app.include_router(sign_info.router)
 
 
 # Health check endpoint

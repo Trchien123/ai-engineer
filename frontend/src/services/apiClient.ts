@@ -171,4 +171,20 @@ export const ExplainService = {
   },
 }
 
+/**
+ * Service for fetching traffic sign metadata
+ */
+export const SignInfoService = {
+  /**
+   * Look up sign metadata by its Descriptions text (the sign label from detection).
+   */
+  lookup: async (name: string): Promise<Record<string, string>> => {
+    const response = await apiClient.get<Record<string, string>>('/sign-info', {
+      params: { name },
+      timeout: 10_000,
+    })
+    return response.data
+  },
+}
+
 export default apiClient
