@@ -41,7 +41,9 @@
 
 .map-container {
   width: 100%;
-  height: 100%;
+  height: 500px;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 /* ── Loading / error overlays ── */
@@ -135,6 +137,7 @@
 .capture-preview img {
   width: 100%;
   height: auto;
+  max-width: 300px;
   border-radius: var(--r-xl);
   object-fit: cover;
   border: 1px solid var(--border);
