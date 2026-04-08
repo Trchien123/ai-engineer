@@ -68,7 +68,7 @@ backend/app/models_data/
     ├── stage1_best.pt                  ← Rubbish area detector
     └── stage2_best.pt                  ← Rubbish type classifier
 ```
-
+https://drive.google.com/drive/u/0/folders/1oQSm2lsku0twFJGKKZzH-e5WjdGONYEU
 ---
 
 ## Damaged Sign Detection Pipeline
