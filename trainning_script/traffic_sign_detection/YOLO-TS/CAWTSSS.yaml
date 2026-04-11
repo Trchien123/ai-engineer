@@ -1,0 +1,10 @@
+# train and val data
+train: CAWTSSS/train/images/
+val: CAWTSSS/val/images/
+
+
+# number of classes
+nc: 3
+
+# class names
+names: ['prohibitory','warning','mandatory']

@@ -1,0 +1,10 @@
+# train and val data
+train: ..\CCTSDB-2021/train  # 118287 images
+val: ..\CCTSDB-2021/val  # 5000 images
+
+
+# number of classes
+nc: 3
+
+# class names
+names: [ 'mandatory','prohibitory','warning']
